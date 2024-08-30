@@ -1,65 +1,111 @@
-class FormSubmit {
-  constructor(settings) {
-    this.settings = settings;
-    this.form = document.querySelector(settings.form);
-    this.formButton = document.querySelector(settings.button);
-    if (this.form) {
-      this.url = this.form.getAttribute("action");
-    }
-    this.sendForm = this.sendForm.bind(this);
+
+const form = document.getElementById("form");
+const username = document.getElementById("username")
+const email = document.getElementById("email")
+const password = document.getElementById("password")
+const passwordConfirmation = document.getElementById("password-confirmation");
+
+
+form.addEventListener("submit", (event) => {
+  event.preventDefault();
+
+  checkForm();
+})
+
+email.addEventListener("blur", () => {
+  checkInputEmail();
+})
+
+
+username.addEventListener("blur", () => {
+  checkInputUsername();
+})
+
+
+function checkInputUsername(){
+  const usernameValue = username.value;
+
+  if(usernameValue === ""){
+    errorInput(username, "Preencha um username!")
+  }else{
+    const formItem = username.parentElement;
+    formItem.className = "form-content"
   }
 
-  displaySuccess() {
-    this.form.innerHTML = this.settings.success;
-  }
-
-  displayError() {
-    this.form.innerHTML = this.settings.error;
-  }
-
-  getFormObject() {
-    const formObject = {};
-    const fields = this.form.querySelectorAll("[name]");
-    fields.forEach((field) => {
-      formObject[field.getAttribute("name")] = field.value;
-    });
-    return formObject;
-  }
-
-  onSubmission(event) {
-    event.preventDefault();
-    event.target.disabled = true;
-    event.target.innerText = "Enviando...";
-  }
-
-  async sendForm(event) {
-    try {
-      this.onSubmission(event);
-      await fetch(this.url, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
-        },
-        body: JSON.stringify(this.getFormObject()),
-      });
-      this.displaySuccess();
-    } catch (error) {
-      this.displayError();
-      throw new Error(error);
-    }
-  }
-
-  init() {
-    if (this.form) this.formButton.addEventListener("click", this.sendForm);
-    return this;
-  }
 }
 
-const formSubmit = new FormSubmit({
-  form: "[data-form]",
-  button: "[data-button]",
-  success: "<h1 class='success'>Mensagem enviada!</h1>",
-  error: "<h1 class='error'>Não foi possível enviar sua mensagem.</h1>",
-});
-formSubmit.init();
+function checkInputEmail(){
+  const emailValue = email.value;
+
+  if(emailValue === ""){
+    errorInput(email, "O email é obrigatório.")
+  }else{
+    const formItem = email.parentElement;
+    formItem.className = "form-content"
+  }
+
+
+}
+
+
+function checkInputPassword(){
+  const passwordValue = password.value;
+
+  if(passwordValue === ""){
+    errorInput(password, "A senha é obrigatória.")
+  }else if(passwordValue.length < 8){
+    errorInput(password, "A senha precisa ter no mínimo 8 caracteres.")
+  }else{
+    const formItem = password.parentElement;
+    formItem.className = "form-content"
+  }
+
+
+}
+
+
+function checkInputPasswordConfirmation(){
+  const passwordValue = password.value;
+  const confirmationPasswordValue = passwordConfirmation.value;
+
+  if(confirmationPasswordValue === ""){
+    errorInput(passwordConfirmation, "A confirmação de senha é obrigatória.")
+  }else if(confirmationPasswordValue !== passwordValue){
+    errorInput(passwordConfirmation, "As senhas não são iguais.")
+  }else{
+    const formItem = passwordConfirmation.parentElement;
+    formItem.className = "form-content"
+  }
+
+
+}
+
+
+function checkForm(){
+  checkInputUsername();
+  checkInputEmail();
+  checkInputPassword();
+  checkInputPasswordConfirmation();
+
+  const formItems = form.querySelectorAll(".form-content")
+
+  const isValid = [...formItems].every( (item) => {
+    return item.className === "form-content"
+  });
+
+  if(isValid){
+    alert("CADASTRADO COM SUCESSO!")
+  }
+
+}
+
+
+function errorInput(input, message){
+  const formItem = input.parentElement;
+  const textMessage = formItem.querySelector("a")
+
+  textMessage.innerText = message;
+
+  formItem.className = "form-content error"
+
+}
